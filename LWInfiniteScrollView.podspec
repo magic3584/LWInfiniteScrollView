@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "LWInfiniteScrollView"
-  s.version      = "0.0.2"
+  s.version      = "0.0.3"
   s.summary      = "LWInfiniteScrollView"
 
   s.description  = "An infinite UIScrollView in swift using three reused views"

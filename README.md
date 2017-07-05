@@ -12,6 +12,11 @@
 * Swift 3.0+
 
 # Installation
+## CocoaPods
+
+1. Add ``pod 'LWChannelManager' `` to your Podfile.
+
+2. Run ``pod install`` or ``pod update``.
 
 ## Manually
 1. Download or clone this repository.
