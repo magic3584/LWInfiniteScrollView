@@ -1,4 +1,4 @@
-# LWChannelManager
+# LWInfiniteScrollView
 
 ![图片](https://github.com/magic3584/LWInfiniteScrollView/raw/master/screenshot.gif)
 
@@ -20,5 +20,5 @@
 
 
 # License
-LWChannelManager is provided under the MIT license. See LICENSE file for details.
+LWInfiniteScrollView is provided under the MIT license. See LICENSE file for details.
 
