@@ -53,7 +53,7 @@ open class LWInfiniteScrollView: UIView {
     
     var timer: Timer!
     
-    init(frame: CGRect, viewsArray: Array<UIView>) {
+    public init(frame: CGRect, viewsArray: Array<UIView>) {
         super.init(frame: frame)
         
         self.dataArray = viewsArray
