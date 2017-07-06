@@ -199,14 +199,18 @@ open class LWInfiniteScrollView: UIView {
     }
     
     @objc func moveNextPage() {
-        contentScrollView.setContentOffset(CGPoint(x: contentScrollView.frame.size.width, y: 0), animated: true)
-        self.middleIndex(afterMove: .right)
-        moveViewAtIndexes([2], direction: .right)
-        
-        contentScrollView.setContentOffset(CGPoint(x: contentScrollView.frame.size.width, y: 0), animated: false)
-        
-        lastPage = 1
-        pageControl.currentPage = selectedViewIndex
+        UIView.animate(withDuration: 0.6, animations: {
+            self.contentScrollView.contentOffset = CGPoint(x: self.contentScrollView.frame.size.width * 2, y: 0)
+            
+        }) { (_) in
+            self.middleIndex(afterMove: .right)
+            self.moveViewAtIndexes([2], direction: .right)
+            
+            self.contentScrollView.setContentOffset(CGPoint(x: self.contentScrollView.frame.size.width, y: 0), animated: false)
+            
+            self.lastPage = 1
+            self.pageControl.currentPage = self.selectedViewIndex
+        }
 
     }
     

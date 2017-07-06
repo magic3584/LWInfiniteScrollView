@@ -30,12 +30,10 @@ class ViewController: UIViewController {
         
         var arr = [UIView]()
         
-        for i in 0...4 {
-            let label = UILabel.init(frame: CGRect(x: SCREEN_WIDTH * CGFloat(i), y: 0, width: SCREEN_WIDTH, height: 200))
-            label.text = "\(i)"
-            label.textAlignment = .center
-            label.font = UIFont.systemFont(ofSize: 50)
-            arr.append(label)
+        for i in 0...3 {
+            let imageView = UIImageView.init(frame: CGRect(x: SCREEN_WIDTH * CGFloat(i), y: 0, width: SCREEN_WIDTH, height: 200))
+            imageView.image = UIImage.init(named: "\(i)")
+            arr.append(imageView)
         }
         
         
