@@ -14,6 +14,9 @@ enum ViewMoveDirection {//View移动方向
 }
 
 class LWInfiniteView: UIView {
+    
+    //是不是用的jietu
+    var isFake = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,11 +27,13 @@ class LWInfiniteView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setContentView(_ view: UIView) {
+    func setContentView(_ view: UIView, isFake: Bool = false) {
+                
         if self.subviews.count != 0 {
             self.subviews[0].removeFromSuperview()
         }
         view.frame.origin = CGPoint(x: 0, y: 0)
+        self.isFake = isFake
         self.addSubview(view)
     }
 }
@@ -40,6 +45,10 @@ open class LWInfiniteScrollView: UIView {
     var middleView: LWInfiniteView?
     var rightView: LWInfiniteView?
     var viewsArray = [LWInfiniteView?]()
+    
+    //当且只有两个数据源View的时候，生成两个截图
+    var firstFakeView: UIView?
+    var secondFakeView: UIView?
     
     var dataArray = [UIView]()
     
@@ -71,6 +80,8 @@ open class LWInfiniteScrollView: UIView {
             
             if viewsArray.count >= 1 {
                 leftView = LWInfiniteView.init(frame: CGRect(x: 0, y: 0, width: width, height: height))
+                leftView?.setContentView(self.dataArray[0])
+
                 scrollView.addSubview(leftView!)
                 self.viewsArray.append(leftView)
                 scrollView.contentSize = CGSize(width: width, height: 0)
@@ -88,7 +99,11 @@ open class LWInfiniteScrollView: UIView {
                 scrollView.contentSize = CGSize(width: width * 3, height: 0)
                 
                 if viewsArray.count == 2 {
-                    leftView?.setContentView(self.dataArray[1])
+                    
+                    firstFakeView = snapForView(self.dataArray[0])
+                    secondFakeView = snapForView(self.dataArray[1])
+                    
+                    leftView?.setContentView(secondFakeView!, isFake: true)
                     middleView?.setContentView(self.dataArray[0])
                     rightView?.setContentView(self.dataArray[1])
                     
@@ -104,6 +119,11 @@ open class LWInfiniteScrollView: UIView {
             
             return scrollView
         }()
+        
+        guard viewsArray.count > 1 else {
+            return
+        }
+        
         pageControl = {
             let pageControl = UIPageControl()
             pageControl.frame=CGRect(x: 0, y: 20,width:self.dataArray.count * 20, height: 20)
@@ -142,7 +162,19 @@ open class LWInfiniteScrollView: UIView {
             viewsArray[1]?.frame.origin.x = contentScrollView.frame.size.width
             viewsArray[2]?.frame.origin.x = contentScrollView.frame.size.width * 2
             
-            viewsArray[0]?.setContentView(self.dataArray[self.leftIndex()])
+            if self.dataArray.count == 2 {
+                viewsArray[1]?.setContentView(self.dataArray[selectedViewIndex])
+
+                if selectedViewIndex == 0 {
+                    viewsArray[0]?.setContentView(secondFakeView!, isFake: true)
+                } else { //selectedViewIndex == 1
+                    viewsArray[0]?.setContentView(firstFakeView!, isFake: true)
+                }
+                
+            } else {
+                viewsArray[0]?.setContentView(self.dataArray[self.leftIndex()])
+            }
+            
             
         case .right://手向左滑动
             let movedView = viewsArray.removeFirst()
@@ -152,7 +184,21 @@ open class LWInfiniteScrollView: UIView {
             viewsArray[1]?.frame.origin.x = contentScrollView.frame.size.width
             viewsArray[2]?.frame.origin.x = contentScrollView.frame.size.width * 2
             
-            viewsArray[2]?.setContentView(self.dataArray[self.rightIndex()])
+            if self.dataArray.count == 2 {
+                viewsArray[1]?.setContentView(self.dataArray[selectedViewIndex])
+
+                if selectedViewIndex == 0 {
+                    viewsArray[2]?.setContentView(secondFakeView!, isFake: true)
+                    
+                } else {// selectedViewIndex == 1
+                    viewsArray[2]?.setContentView(firstFakeView!, isFake: true)
+                }
+                
+                
+            } else {
+                viewsArray[2]?.setContentView(self.dataArray[self.rightIndex()])
+
+            }
             
         case .none:
             break
@@ -215,9 +261,27 @@ open class LWInfiniteScrollView: UIView {
     
     //预留：外部调用翻页
     open func nextPatch() {
+        
+        guard self.dataArray.count > 1 else {
+            return
+        }
+        
         timer.invalidate()
         timer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(LWInfiniteScrollView.moveNextPage), userInfo: nil, repeats: true)
         moveNextPage()
+    }
+    
+    
+    fileprivate func snapForView(_ view: UIView) -> UIImageView {
+        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, 0.0)
+        view.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        let snap = UIImageView(image: image)
+//        let red = UIView.init(frame: CGRect(x: 0, y: 0, width: view.bounds.size.width, height: 20))
+//        red.backgroundColor = UIColor.red
+//        snap.addSubview(red)
+        return snap
     }
 
 }
@@ -225,11 +289,20 @@ extension LWInfiniteScrollView: UIScrollViewDelegate {
     public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
         scrollView.isUserInteractionEnabled = false
         
+        guard self.dataArray.count > 1 else {
+            return
+        }
+        
         timer.invalidate()
     }
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         
         scrollView.isUserInteractionEnabled = true
+        
+        guard self.dataArray.count > 1 else {
+            return
+        }
+        
         timer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(LWInfiniteScrollView.moveNextPage), userInfo: nil, repeats: true)
 
         
@@ -257,3 +330,17 @@ extension LWInfiniteScrollView: UIScrollViewDelegate {
 
     }
 }
+
+extension UIView
+{
+    func copyView<T: UIView>() -> T {
+        return NSKeyedUnarchiver.unarchiveObject(with: NSKeyedArchiver.archivedData(withRootObject: self)) as! T
+    }
+    
+    func copyView() -> UIView {
+        self.isHidden = false //The copy not works if is hidden, just prevention
+        let viewCopy = self.snapshotView(afterScreenUpdates: true)
+        return viewCopy!
+    }
+}
+

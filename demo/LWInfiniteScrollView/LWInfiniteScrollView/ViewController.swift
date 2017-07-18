@@ -35,7 +35,9 @@ class ViewController: UIViewController {
             imageView.image = UIImage.init(named: "\(i)")
             arr.append(imageView)
         }
-        
+//        let imageView = UIImageView.init(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH, height: 200))
+//        imageView.image = UIImage.init(named: "\(0)")
+//        arr.append(imageView)
         
         let view = LWInfiniteScrollView.init(frame: CGRect(x: 0, y: 0, width: SCREEN_WIDTH, height: 300), viewsArray: arr)
         self.view.addSubview(view)
